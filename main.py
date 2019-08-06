@@ -42,6 +42,9 @@ def print_scm(x): return print(">> {}".format(x))
 
 def is_symbol(x): return isinstance(x, Symbol)
 
+
+def is_closure(x): return isinstance(x, Closure)
+
 # The environment model
 # Env = dict
 
@@ -165,7 +168,7 @@ def get_prelude():
         'null?': is_null,
         'number?': is_number,
         'print': print_scm,
-        'procedure?': callable,
+        'procedure?': is_closure,
         'round': round,
         'symbol?': is_symbol,
         '#t': True,
