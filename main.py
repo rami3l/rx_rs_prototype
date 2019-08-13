@@ -2,36 +2,98 @@ import math
 import sys
 import operator as op
 from copy import copy as cp
+from copy import deepcopy as dcp
 
 # Types
+
+"""
+Todo: implement append
+class List(object):
+
+    def __init__(self):
+        self = None
+
+    @classmethod
+    def from_list(cls, list_):
+        res = cls()
+        if list_:
+            res.head = car(list_)
+            res.tail = cls.from_list(cdr(list_))
+        return res
+
+    def __getitem__(self, index):
+        if index == 0:
+            return car(self)
+        elif index > 0:
+            return self.tail.__getitem__(index-1)
+        elif index == -1:
+            inner = dcp(self)
+            while inner.tail:
+                inner = inner.head
+            return inner.head
+        else:
+            raise NotImplementedError
+
+    @classmethod
+    def cons(cls, head, tail):
+        res = cls()
+        res.head = head
+        res.tail = tail
+        return res
+"""
+
+
+class List(list):
+    @classmethod
+    def from_list(cls, list_):
+        return cls(list_)
+
+    @property
+    def head(self):
+        return self[0]
+
+    @property
+    def tail(self):
+        return self[1:]
+
+
 Symbol = str
 Number = (int, float)
 Atom = (Symbol, Number)
-List = list
 Exp = (Atom, List)
 
 # Primitive definitions
 begin = lambda *x: x[-1]
 
 
-def car(x): return x[0]
+def car(x):
+    if isinstance(x, List):
+        return x.head
+    else:
+        return x[0]
 
 
-def cdr(x): return x[1:]
+def cdr(x):
+    if isinstance(x, List):
+        return x.tail
+    else:
+        return x[1:]
 
 
-def cons(x, y): return [x] + y
+def cons(x, y):
+    return [x] + y
+    # return List.cons(x, y)
 # ! Attention: the function cons here cannot make up a pair,
 # ! maybe we should refactor the List type
 
 
-list_scm = lambda *x: list(x)
+list_scm = lambda *x: List(x)
 
 
 def is_list(x): return isinstance(x, List)
 
 
-def is_null(x): return x == []
+def is_null(x): return x == list()
 
 
 def is_number(x): return isinstance(x, Number)
@@ -104,13 +166,13 @@ def atom(token):
             return token
 
 
-def gen_ast(tokens: list):
+def gen_ast(tokens: list) -> List:
     if not tokens:
         raise SyntaxError("Unexpected EOF")
     head = tokens.pop(0)
     if head == "(":
         # if we have a list ahead of us, we return that list
-        res = list()
+        res = List()
         try:
             while tokens[0] != ")":
                 res.append(gen_ast(tokens))
@@ -128,7 +190,7 @@ def gen_ast(tokens: list):
         return atom(head)
 
 
-def parse(str_exp):
+def parse(str_exp: str) -> List:
     return gen_ast(tokenize(str_exp))
 
 
@@ -173,7 +235,7 @@ def get_prelude():
         'symbol?': is_symbol,
         '#t': True,
         '#f': False,
-        'null': [],
+        'null': List(),
     })
     return res
 
@@ -181,7 +243,7 @@ def get_prelude():
 global_env = get_prelude()
 
 
-def eval(exp, env=global_env):
+def eval(exp: Exp, env=global_env):
     if isinstance(exp, Number):
         return exp
     elif isinstance(exp, Symbol):
@@ -273,7 +335,7 @@ def scm_str(exp):
     """
     Convert a Python object back into a Scheme-readable string.
     """
-    if isinstance(exp, List):
+    if isinstance(exp, list):
         return '(' + ' '.join(map(scm_str, exp)) + ')'
     else:
         return str(exp)
