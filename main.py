@@ -206,7 +206,7 @@ def get_prelude():
         '<': op.lt,
         '<=': op.le,
         '>': op.gt,
-        '>=': op.le,
+        '>=': op.ge,
         '=': op.eq,
         'abs': abs,
         'append': op.add,
